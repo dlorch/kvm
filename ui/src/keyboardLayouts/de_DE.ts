@@ -1,6 +1,6 @@
-import { KeyCombo } from "../keyboardLayouts"
+import { countryCodes } from "@/keyboardMappings";
 
-export const name = "Deutsch";
+import { KeyCombo } from "../keyboardLayouts"
 
 const keyAcute = { key: "Equal" } // accent aigu (acute accent), mark ´ placed above the letter
 const keyHat = { key: "Backquote" } // accent circonflexe (accent hat), mark ^ placed above the letter
@@ -150,3 +150,10 @@ export const chars = {
   Enter: { key: "Enter" },
   Tab: { key: "Tab" },
 } as Record<string, KeyCombo>;
+
+export const de_DE = {
+  isoCode: "de-DE",
+  name: "Deutsch",
+  countryCode: countryCodes.German,
+  chars
+};

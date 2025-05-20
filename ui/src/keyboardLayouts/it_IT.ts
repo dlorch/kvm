@@ -1,6 +1,6 @@
-import { KeyCombo } from "../keyboardLayouts"
+import { countryCodes } from "@/keyboardMappings";
 
-export const name = "Italiano";
+import { KeyboardLayout, KeyCombo } from "../keyboardLayouts"
 
 export const chars = {
   A: { key: "KeyA", shift: true },
@@ -111,3 +111,10 @@ export const chars = {
   Enter: { key: "Enter" },
   Tab: { key: "Tab" },
 } as Record<string, KeyCombo>;
+
+export const it_IT: KeyboardLayout = {
+  isoCode: "it-IT",
+  name: "Italiano",
+  countryCode: countryCodes.Italian,
+  chars: chars
+};

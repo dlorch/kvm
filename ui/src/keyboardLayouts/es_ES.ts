@@ -1,6 +1,6 @@
-import { KeyCombo } from "../keyboardLayouts"
+import { countryCodes } from "@/keyboardMappings";
 
-export const name = "Español";
+import { KeyboardLayout, KeyCombo } from "../keyboardLayouts"
 
 const keyTrema = { key: "Quote", shift: true } // tréma (umlaut), two dots placed above a vowel
 const keyAcute = { key: "Quote" } // accent aigu (acute accent), mark ´ placed above the letter
@@ -166,3 +166,10 @@ export const chars = {
   Enter: { key: "Enter" },
   Tab: { key: "Tab" },
 } as Record<string, KeyCombo>;
+
+export const es_ES: KeyboardLayout = {
+  isoCode: "es-ES",
+  name: "Español",
+  countryCode: countryCodes.Spanish,
+  chars: chars
+};

@@ -1,6 +1,6 @@
-import { KeyCombo } from "../keyboardLayouts"
+import { countryCodes } from "@/keyboardMappings";
 
-export const name = "Belgisch Nederlands";
+import { KeyboardLayout, KeyCombo } from "../keyboardLayouts"
 
 const keyTrema = { key: "BracketLeft", shift: true } // tréma (umlaut), two dots placed above a vowel
 const keyHat = { key: "BracketLeft" } // accent circonflexe (accent hat), mark ^ placed above the letter
@@ -165,3 +165,10 @@ export const chars = {
   Enter: { key: "Enter" },
   Tab: { key: "Tab" },
 } as Record<string, KeyCombo>;
+
+export const fr_BE: KeyboardLayout = {
+  isoCode: "fr-BE",
+  name: "Belgisch Nederlands",
+  countryCode: countryCodes.Belgian,
+  chars: chars
+};

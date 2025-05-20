@@ -1,6 +1,6 @@
-import { KeyCombo } from "../keyboardLayouts"
+import { countryCodes } from "@/keyboardMappings";
 
-export const name = "Norsk bokmål";
+import { KeyboardLayout, KeyCombo } from "../keyboardLayouts"
 
 const keyTrema = { key: "BracketRight" } // tréma (umlaut), two dots placed above a vowel
 const keyAcute = { key: "Equal", altRight: true } // accent aigu (acute accent), mark ´ placed above the letter
@@ -165,3 +165,10 @@ export const chars = {
   Enter: { key: "Enter" },
   Tab: { key: "Tab" },
 } as Record<string, KeyCombo>;
+
+export const nb_NO: KeyboardLayout = {
+  isoCode: "nb-NO",
+  name: "Norsk bokmål",
+  countryCode: countryCodes.Norwegian,
+  chars: chars
+};

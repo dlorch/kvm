@@ -1,6 +1,6 @@
-import { KeyCombo } from "../keyboardLayouts"
+import { countryCodes } from "@/keyboardMappings";
 
-export const name = "English (US)";
+import { KeyboardLayout, KeyCombo } from "../keyboardLayouts"
 
 export const chars = {
   A: { key: "KeyA", shift: true },
@@ -103,11 +103,18 @@ export const chars = {
   "\n": { key: "Enter", shift: false },
   Enter: { key: "Enter", shift: false },
   Tab: { key: "Tab", shift: false },
-  PrintScreen: { key: "Prt Sc", shift: false },
-  SystemRequest: { key: "Prt Sc", shift: true },
+  PrintScreen: { key: "PrintScreen", shift: false },
+  SystemRequest: { key: "PrintScreen", shift: true },
   ScrollLock: { key: "ScrollLock", shift: false},
   Pause: { key: "Pause", shift: false },
   Break: { key: "Pause", shift: true },
   Insert: { key: "Insert", shift: false },
   Delete: { key: "Delete", shift: false },
-} as Record<string, KeyCombo>
+} as Record<string, KeyCombo>;
+
+export const en_US: KeyboardLayout = {
+  isoCode: "en-US",
+  name: "English (US)",
+  countryCode: countryCodes.UnitedStates,
+  chars
+};

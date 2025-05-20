@@ -1,7 +1,8 @@
-import { KeyCombo } from "../keyboardLayouts"
-import { chars as chars_de_CH } from "./de_CH"
+import { countryCodes } from "@/keyboardMappings";
 
-export const name = "Français de Suisse";
+import {  KeyboardLayout, KeyCombo } from "../keyboardLayouts"
+
+import { chars as chars_de_CH } from "./de_CH"
 
 export const chars = {
   ...chars_de_CH,
@@ -12,3 +13,10 @@ export const chars = {
   "à": { key: "Quote" },
   "ä": { key: "Quote", shift: true },
 } as Record<string, KeyCombo>;
+
+export const fr_CH: KeyboardLayout = {
+  isoCode: "fr-CH",
+  name: "Français de Suisse",
+  countryCode: countryCodes.SwissFrench,
+  chars
+};

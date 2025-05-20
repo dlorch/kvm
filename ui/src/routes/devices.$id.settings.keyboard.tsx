@@ -4,7 +4,7 @@ import { useSettingsStore } from "@/hooks/stores";
 import { useJsonRpc } from "@/hooks/useJsonRpc";
 import notifications from "@/notifications";
 import { SettingsPageHeader } from "@components/SettingsPageheader";
-import { layouts } from "@/keyboardLayouts";
+import { keyboardOptions } from "@/keyboardLayouts";
 
 import { FeatureFlag } from "../components/FeatureFlag";
 import { SelectMenuBasic } from "../components/SelectMenuBasic";
@@ -17,8 +17,6 @@ export default function SettingsKeyboardRoute() {
     state => state.setKeyboardLayout,
   );
 
-  const layoutOptions = Object.entries(layouts).map(([code, language]) => { return { value: code, label: language } })
-
   const [send] = useJsonRpc();
 
   useEffect(() => {
@@ -26,7 +24,7 @@ export default function SettingsKeyboardRoute() {
       if ("error" in resp) return;
       setKeyboardLayout(resp.result as string);
     });
-  }, []);
+  }, [send, setKeyboardLayout]);
 
   const onKeyboardLayoutChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -53,10 +51,9 @@ export default function SettingsKeyboardRoute() {
 
       <div className="space-y-4">
         <FeatureFlag minAppVersion="0.4.0" name="Paste text">
-	  { /* this menu item could be renamed to plain "Keyboard layout" in the future, when also the virtual keyboard layout mappings are being implemented */ }
           <SettingsItem
             title="Paste text"
-            description="Keyboard layout of target operating system"
+            description="Keyboard layout"
           >
             <SelectMenuBasic
               size="SM"
@@ -64,7 +61,7 @@ export default function SettingsKeyboardRoute() {
               fullWidth
               value={keyboardLayout}
               onChange={onKeyboardLayoutChange}
-              options={layoutOptions}
+              options={keyboardOptions()}
             />
           </SettingsItem>
 	  <p className="text-xs text-slate-600 dark:text-slate-400">

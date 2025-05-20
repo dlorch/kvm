@@ -9,12 +9,12 @@ import { TextAreaWithLabel } from "@components/TextArea";
 import { SettingsPageHeader } from "@components/SettingsPageheader";
 import { useJsonRpc } from "@/hooks/useJsonRpc";
 import { useHidStore, useRTCStore, useUiStore, useSettingsStore } from "@/hooks/stores";
-import { keys, modifiers } from "@/keyboardMappings";
-import { layouts, chars } from "@/keyboardLayouts";
+import { KeyStroke, keys, modifiers } from "@/keyboardMappings";
+import { KeyboardLayout, selectedKeyboard } from "@/keyboardLayouts";
 import notifications from "@/notifications";
 
-const hidKeyboardPayload = (keys: number[], modifier: number) => {
-  return { keys, modifier };
+const hidKeyboardPayload = (modifier: number, keys: number[]) => {
+  return { modifier, keys };
 };
 
 const modifierCode = (shift?: boolean, altRight?: boolean) => {
@@ -38,13 +38,12 @@ export default function PasteModal() {
   const setKeyboardLayout = useSettingsStore(
     state => state.setKeyboardLayout,
   );
-
   useEffect(() => {
     send("getKeyboardLayout", {}, resp => {
       if ("error" in resp) return;
       setKeyboardLayout(resp.result as string);
     });
-  }, []);
+  }, [send, setKeyboardLayout]);
 
   const onCancelPasteMode = useCallback(() => {
     setPasteMode(false);
@@ -56,49 +55,62 @@ export default function PasteModal() {
     setPasteMode(false);
     setDisableVideoFocusTrap(false);
     if (rpcDataChannel?.readyState !== "open" || !TextAreaRef.current) return;
-    if (!keyboardLayout) return;
-    if (!chars[keyboardLayout]) return;
-
+    const keyboard: KeyboardLayout = selectedKeyboard(keyboardLayout);
     const text = TextAreaRef.current.value;
 
     try {
       for (const char of text) {
-        const { key, shift, altRight, deadKey, accentKey } = chars[keyboardLayout][char]
-        if (!key) continue;
+        const keyprops = keyboard.chars[char];
+        if (!keyprops) {
+          console.log("No translation for: ", char);
+          continue;
+        }
 
-	const keyz = [ keys[key] ];
-	const modz = [ modifierCode(shift, altRight) ];
+        const { key, shift, altRight, deadKey, accentKey } = keyprops;
+        if (!key) {
+          console.log("No key for: ", char);
+          continue;
+        }
 
-	if (deadKey) {
-            keyz.push(keys["Space"]);
-            modz.push(noModifier);
-	}
-	if (accentKey) {
-            keyz.unshift(keys[accentKey.key])
-            modz.unshift(modifierCode(accentKey.shift, accentKey.altRight))
-	}
+        const keystrokes: KeyStroke[] = [];
+        keystrokes.push({ modifier: modifierCode(shift, altRight), keys: [keys[key]]});
 
-	for (const [index, kei] of keyz.entries()) {
-          await new Promise<void>((resolve, reject) => {
-            send(
-              "keyboardReport",
-              hidKeyboardPayload([kei], modz[index]),
-              params => {
-                if ("error" in params) return reject(params.error);
-                send("keyboardReport", hidKeyboardPayload([], 0), params => {
-                  if ("error" in params) return reject(params.error);
-                  resolve();
-                });
-              },
-            );
-          });
-	}
+        // if what was requested was a dead key, we need to send an unmodified space to emit
+        // just the accent character
+        if (deadKey) {
+           keystrokes.push({ modifier: noModifier, keys: [keys["Space"]] });
+        }
+
+        // if this is an accented character, we need to send that accent FIRST
+        if (accentKey) {
+          keystrokes.unshift({modifier: modifierCode(accentKey.shift, accentKey.altRight), keys: [keys[accentKey.key]] })
+        }
+
+        for (const stroke of keystrokes) {
+          await sendKeystroke(stroke);
+        }
+
+        // now send a message with no keys down to "release" the last character sent
+        await sendKeystroke({ modifier: 0, keys: [] });
       }
     } catch (error) {
-      console.error(error);
+      console.error("Failed to paste text:", error);
       notifications.error("Failed to paste text");
     }
-  }, [rpcDataChannel?.readyState, send, setDisableVideoFocusTrap, setPasteMode]);
+
+    async function sendKeystroke(stroke: KeyStroke) {
+      await new Promise<void>((resolve, reject) => {
+        send(
+          "keyboardReport",
+          hidKeyboardPayload(stroke.modifier, stroke.keys),
+          params => {
+            if ("error" in params) return reject(params.error);
+            resolve();
+          }
+        );
+      });
+    }
+  }, [rpcDataChannel?.readyState, send, setDisableVideoFocusTrap, setPasteMode, keyboardLayout]);
 
   useEffect(() => {
     if (TextAreaRef.current) {
@@ -148,7 +160,7 @@ export default function PasteModal() {
                             // @ts-expect-error TS doesn't recognize Intl.Segmenter in some environments
                             [...new Intl.Segmenter().segment(value)]
                               .map(x => x.segment)
-                              .filter(char => !chars[keyboardLayout][char]),
+                              .filter(char => !selectedKeyboard(keyboardLayout).chars[char]),
                           ),
                         ];
 
@@ -169,7 +181,7 @@ export default function PasteModal() {
                 </div>
 		<div className="space-y-4">
                   <p className="text-xs text-slate-600 dark:text-slate-400">
-                    Sending key codes using keyboard layout {layouts[keyboardLayout]}
+                    Sending key codes using keyboard layout {selectedKeyboard(keyboardLayout).name}
                   </p>
 		</div>
               </div>
